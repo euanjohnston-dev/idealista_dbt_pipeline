@@ -1,0 +1,29 @@
+version: 2
+
+sources:
+  - name: property_analytics
+    schema: property_analytics
+    description: property_analytics
+    tables: 
+      - name: property_source_main
+        description: Test
+        identifier: property_analytics_resource__element_list
+      - name:  pagination_metadata
+        description: Test
+        identifier: property_analytics_resource
+      - name: load_metadata
+        description: Test
+        identifier: _dlt_loads
+
+
+  - name: sheets_check
+    description: Test
+    schema: sheets_check
+    tables: 
+      - name: upload_distinct
+        description: Test
+        identifier: upload_distinct
+      - name: upload_duplicates
+        description: Test
+        identifier: upload_duplicates
+

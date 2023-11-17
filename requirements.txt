@@ -1,0 +1,2 @@
+dlt[bigquery]>=0.3.24
+dbt

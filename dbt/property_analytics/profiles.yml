@@ -1,0 +1,16 @@
+property_analytics:
+  target: dev
+  outputs:
+    dev:
+      dataset: dbt
+      job_execution_timeout_seconds: 5
+      job_retries: 1
+      keyfile: keyfile.json
+      location: europe-west3
+      method: service-account
+      priority: interactive
+      project: propertyanalytics-404010
+      threads: 2
+      type: bigquery
+
+  target: dev
