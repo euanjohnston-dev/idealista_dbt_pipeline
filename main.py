@@ -1,7 +1,7 @@
 import logging
 from dbt_run_pipeline import dbt_run
 
-def pipeline_dbt_run(request):
+def pipeline_dbt_run(request): 
     logging.info("Starting Cloud Function execution.")
     try:
         dbt_run()
