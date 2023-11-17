@@ -1,6 +1,6 @@
 import dlt
 
-def dbt_run():
+def dbt_pipeline():
 
     pipeline = dlt.pipeline(
         pipeline_name='dbt_pipeline',
