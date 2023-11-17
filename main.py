@@ -1,15 +1,15 @@
 import logging
-import json
 from dbt_run_pipeline import dbt_run
+import base64
 
-def dbt_pipeline(event, context):
+def dbt_pipeline(data, context):
     """Triggered by a Pub/Sub message."""
-    logging.info(f"Function triggered by Pub/Sub event: {event}")
+    logging.info(f"Function triggered by Pub/Sub event: {data}")
 
     try:
         # Decode the Pub/Sub message
-        message_data = json.loads(event["data"])
-        logging.info(f"Received message data: {message_data}")
+        message = base64.b64decode(data['data']).decode('utf-8')
+        logging.info(f"Received message data: {message}")
 
         # Add your logic to process the Pub/Sub message if needed
 
