@@ -1,1 +1,2 @@
 dbt_env/
+.secrets.toml
