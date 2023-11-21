@@ -1,3 +1,6 @@
 dbt_env/
 .secrets.toml
 Makefile
+keyfile.json
+logs/
+.DS_Store
