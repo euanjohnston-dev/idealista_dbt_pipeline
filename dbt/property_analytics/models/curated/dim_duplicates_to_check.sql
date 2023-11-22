@@ -95,7 +95,8 @@ EstablishExistingRelationships AS (
   WHERE NOT (dpd3.child_property IS NOT NULL AND dpd4.child_property IS NOT NULL)
 )
 
-SELECT parent_duplicate_to_check,
+SELECT Distinct
+       parent_duplicate_to_check,
        child_duplicate_to_check,
        CURRENT_DATETIME() AS dbt_loaded_at_utc,
        '{{ var("job_id") }}' AS dbt_job_id
