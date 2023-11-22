@@ -17,6 +17,7 @@ WITH table_base AS (
 )
 
 SELECT 
+  Distinct
   ID,
   CAST(parent_property AS STRING) as parent_property,
   CAST(child_property AS STRING) as child_property,
