@@ -1,35 +1,35 @@
-{{ config(materialized='table') }}
-
 WITH RECURSIVE ParentChild AS (
   SELECT
-    property_code_1 AS parent,
-    property_code_2 AS child,
+    parent_property AS parent,
+    child_property AS child,
     0 AS level
-    FROM {{ ref("dim_property_duplicates") }} d
+  FROM {{ ref("dim_property_duplicates") }} d
 
   UNION ALL
+
   SELECT
     p.parent,
-    d.property_code_2 AS child,
+    d.child_property AS child,
     p.level + 1
   FROM
     ParentChild p
   JOIN
-    {{ ref("dim_property_duplicates") }} d
+     {{ ref("dim_property_duplicates") }} d
   ON
-    p.child = d.property_code_1
+    p.child = d.parent_property
 ), 
-duplicate_relationships as (
 
-SELECT distinct
-  parent,
-  child
-FROM
-  ParentChild -- To exclude self-referencing duplicates
-ORDER BY
-  parent, child
+duplicate_relationships as (
+  SELECT distinct
+    parent,
+    child
+  FROM
+    ParentChild -- To exclude self-referencing duplicates
+  ORDER BY
+    parent, child
 ),
- ParentChildAggregated AS (
+
+ParentChildAggregated AS (
   SELECT
     parent AS id,
     STRING_AGG(child, ', ') AS duplicate_listings,
@@ -39,21 +39,27 @@ ORDER BY
   GROUP BY
     parent
 )
+
 SELECT
-  mt.* EXCEPT(dbt_loaded_at_utc,dbt_job_id),
+  mt.* EXCEPT(dbt_loaded_at_utc),
   COALESCE(pca.duplicate_listings, '') AS duplicate_listings,
   COALESCE(pca.total_listings, 1) AS total_listings,
-  cast(inserted_at as Date) as date_of_scrape,#
-  CURRENT_DATETIME() AS dbt_loaded_at_utc,
-  '{{ var("job_id") }}' AS dbt_job_id
+  CAST(inserted_at AS Date) AS date_of_scrape,
+  CURRENT_DATETIME() AS dbt_loaded_at_utc
 FROM
- {{ ref("stg_property_analytics") }} AS mt
+  {{ ref("stg_property_analytics") }} AS mt
 LEFT JOIN
   ParentChildAggregated AS pca
 ON
-  mt.property_code = pca.id
-left join {{ ref("stg_pagination_metadata") }} par on mt._dlt_parent_id = par._dlt_id
-left join {{ ref("stg_load_metadata") }} dl on par._dlt_load_id = dl.load_id
+  mt.property_code = CAST(pca.id AS STRING)
+LEFT JOIN
+  {{ ref("stg_pagination_metadata") }} par
+ON
+  mt._dlt_parent_id = par._dlt_id
+LEFT JOIN
+  {{ ref("stg_load_metadata") }} dl
+ON
+  par._dlt_load_id = dl.load_id
 WHERE
   mt.property_code NOT IN (
     SELECT child
@@ -69,7 +75,7 @@ WHERE
       LEFT JOIN
         ParentChildAggregated AS pca
       ON
-        mt.property_code = pca.id
+        mt.property_code = CAST(pca.id AS STRING)
       WHERE
         mt.property_code NOT IN (
           SELECT child

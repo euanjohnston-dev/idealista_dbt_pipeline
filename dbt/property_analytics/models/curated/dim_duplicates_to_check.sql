@@ -3,16 +3,15 @@
 WITH PropertyData AS (
   SELECT
     property_code,
-    CAST(size AS STRING) AS size_str,
-    CAST(rooms AS STRING) AS rooms_str,
-    CAST(bathrooms AS STRING) AS bathrooms_str,
+    size AS size_str,
+    rooms AS rooms_str,
+    bathrooms AS bathrooms_str,
     latitude,
     longitude,
     price,
     contact_info__microsite_short_name,
     description
-    FROM {{ ref("stg_property_analytics") }} lps
-
+  FROM {{ ref("stg_property_analytics") }} lps
 ),
 
 Differentials AS (
@@ -40,21 +39,34 @@ Differentials AS (
   ORDER BY a.size_str, a.rooms_str, a.bathrooms_str, a.property_code, b.property_code
 ),
 
-
 FilteredDifferentials AS (
   SELECT cpd.*
   FROM Differentials cpd
   LEFT JOIN  {{ ref("stg_property_duplicates") }}  pdu
-  ON (cpd.first_duplicate = pdu.property_code_1 AND cpd.second_duplicate = pdu.property_code_2)
-      OR (cpd.first_duplicate = pdu.property_code_2 AND cpd.second_duplicate = pdu.property_code_1)
+  ON (cpd.first_duplicate = pdu.parent_property AND cpd.second_duplicate = pdu.child_property)
+      OR (cpd.first_duplicate = pdu.child_property AND cpd.second_duplicate = pdu.parent_property)
   LEFT JOIN  {{ ref("stg_property_distinct") }} pdi 
-  ON (cpd.first_duplicate = pdi.property_code_1 AND cpd.second_duplicate = pdi.property_code_2)
-      OR (cpd.first_duplicate = pdi.property_code_2 AND cpd.second_duplicate = pdi.property_code_1)
-  WHERE pdi.property_code_1 IS NULL and   pdu.property_code_1 IS NULL
+  ON (cpd.first_duplicate = pdi.parent_property AND cpd.second_duplicate = pdi.child_property)
+      OR (cpd.first_duplicate = pdi.child_property AND cpd.second_duplicate = pdi.parent_property)
+  WHERE pdi.parent_property IS NULL and pdu.parent_property IS NULL
     AND cpd.distance < 1
     AND cpd.first_price = cpd.second_price
     AND cpd.first_agency != cpd.second_agency
 )
 
-SELECT distinct first_duplicate, second_duplicate
-FROM FilteredDifferentials
+SELECT DISTINCT
+  CASE
+    WHEN dpc.parent_property IS NOT NULL THEN dpc.parent_property
+    WHEN dpc2.parent_property IS NOT NULL THEN dpc2.parent_property
+  END AS parent_property,
+  CASE
+    WHEN dpc.parent_property IS NOT NULL THEN dpc.child_property
+    WHEN dpc2.parent_property IS NOT NULL THEN dpc2.child_property
+  END AS child_property
+FROM FilteredDifferentials dct
+LEFT JOIN {{ ref("stg_property_duplicates") }} dpc
+  ON dct.first_duplicate = dpc.parent_property OR dct.first_duplicate = dpc.child_property
+LEFT JOIN {{ ref("stg_property_duplicates") }} dpc2
+  ON dct.second_duplicate = dpc2.parent_property OR dct.second_duplicate = dpc2.child_property
+WHERE (dpc.parent_property IS NOT NULL AND dpc.child_property IS NOT NULL)
+   OR (dpc2.parent_property IS NOT NULL AND dpc2.child_property IS NOT NULL)

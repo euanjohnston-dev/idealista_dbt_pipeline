@@ -12,7 +12,8 @@ FROM {{ source('property_analytics', 'property_source_main') }} parel
          {{ source('property_analytics', 'load_metadata') }} dl ON par._dlt_load_id = dl.load_id
 )
 SELECT
-  * Except(date_, row_num),
+  * Except(date_, row_num, property_code),
+  CAST(property_code AS STRING) AS property_code,
   CURRENT_DATETIME() AS dbt_loaded_at_utc,
   '{{ var("job_id") }}' AS dbt_job_id
 FROM
