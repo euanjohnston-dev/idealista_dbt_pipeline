@@ -4,14 +4,14 @@
 WITH LatestScrapeDates AS (
   SELECT
     property_code,
-    Min(date_of_scrape) AS date_of_scrape
-  FROM {{ ref("fct_property_unique") }}
+    Min(dlt_scrape_date) AS dlt_scrape_date
+  FROM {{ ref("fct_properties") }}
   GROUP BY property_code
 )
 
 SELECT
   ls.property_code,
-  ls.date_of_scrape,
+  ls.dlt_scrape_date,
   fpu.price,
   fpu.size,
   fpu.rooms,
@@ -20,5 +20,5 @@ SELECT
   CURRENT_DATETIME() AS dbt_loaded_at_utc,
   '{{ var("job_id") }}' AS dbt_job_id
 FROM LatestScrapeDates ls
-JOIN {{ ref("fct_property_unique") }}  fpu ON ls.property_code = fpu.property_code AND ls.date_of_scrape = fpu.date_of_scrape
-WHERE ls.date_of_scrape != (SELECT Min(date_of_scrape) FROM {{ ref("fct_property_unique") }})
+JOIN {{ ref("fct_properties") }}  fpu ON ls.property_code = fpu.property_code AND ls.dlt_scrape_date = fpu.dlt_scrape_date
+WHERE ls.dlt_scrape_date != (SELECT Min(dlt_scrape_date) FROM {{ ref("fct_properties") }})

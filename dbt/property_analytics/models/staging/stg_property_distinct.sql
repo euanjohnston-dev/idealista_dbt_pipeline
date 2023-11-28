@@ -10,17 +10,17 @@
 -- Select statement for the incremental model
 WITH table_base AS (
   SELECT
-    LOWER(TO_HEX(SHA256(CONCAT(CAST(parent_property AS STRING), '_', CAST(child_property AS STRING))))) AS ID,
-    parent_property,
-    child_property
+    LOWER(TO_HEX(SHA256(CONCAT(CAST(property_code_1 AS STRING), '_', CAST(property_code_2 AS STRING))))) AS ID,
+    property_code_1,
+    property_code_2
   FROM {{ source('sheets_check', 'upload_distinct') }}
 )
 
 SELECT 
   Distinct
   ID,
-  CAST(parent_property AS STRING) as parent_property,
-  CAST(child_property AS STRING) as child_property,
+  CAST(property_code_1 AS STRING) as property_code_1,
+  CAST(property_code_2 AS STRING) as property_code_2,
   CURRENT_DATETIME() AS dbt_loaded_at_utc,
   '{{ var("job_id") }}' AS dbt_job_id
 FROM table_base

@@ -12,6 +12,10 @@ WITH PropertyData AS (
     contact_info__microsite_short_name,
     description
   FROM {{ ref("stg_property_analytics") }} lps
+  WHERE dlt_scrape_date = (
+    SELECT MAX(dlt_scrape_date)
+    FROM {{ ref("stg_property_analytics") }}
+  )
 ),
 
 Differentials AS (
@@ -25,79 +29,74 @@ Differentials AS (
     a.price AS first_price,
     b.price AS second_price,
     a.price - b.price AS price_differential,
-    a.contact_info__microsite_short_name as first_agency,
-    b.contact_info__microsite_short_name as second_agency,
-    a.description as first_description,
-    b.description as second_description,
+    CASE WHEN a.contact_info__microsite_short_name IS NULL THEN '-' ELSE a.contact_info__microsite_short_name END AS first_agency,
+    CASE WHEN b.contact_info__microsite_short_name IS NULL THEN '-' ELSE b.contact_info__microsite_short_name END AS second_agency,
+    a.description AS first_description,
+    b.description AS second_description,
     6371 * 2 * ASIN(SQRT(
       POWER(SIN(0.017453292519943295 * (a.latitude - b.latitude) / 2), 2) +
       COS(0.017453292519943295 * a.latitude) * COS(0.017453292519943295 * b.latitude) * POWER(SIN(0.017453292519943295 * (a.longitude - b.longitude) / 2), 2)
     )) AS distance
   FROM PropertyData AS a
-  CROSS JOIN PropertyData AS b
-  WHERE  a.property_code < b.property_code
+  JOIN PropertyData AS b
+    ON a.property_code < b.property_code
   ORDER BY a.size_str, a.rooms_str, a.bathrooms_str, a.property_code, b.property_code
 ),
 
-FilteredDifferentials AS (
-  SELECT cpd.*
-  FROM Differentials cpd
-  LEFT JOIN {{ ref("stg_property_duplicates") }} pdu
-  ON (cpd.first_duplicate = CAST(pdu.parent_property AS STRING) AND cpd.second_duplicate = pdu.child_property)
-      OR (cpd.first_duplicate = CAST(pdu.child_property AS STRING) AND cpd.second_duplicate = pdu.parent_property)
-  LEFT JOIN {{ ref("stg_property_distinct") }} pdi 
-  ON (cpd.first_duplicate = CAST(pdi.parent_property AS STRING) AND cpd.second_duplicate = pdi.child_property)
-      OR (cpd.first_duplicate = CAST(pdi.child_property AS STRING) AND cpd.second_duplicate = pdi.parent_property)
-  WHERE pdi.parent_property IS NULL and pdu.parent_property IS NULL
-    AND cpd.distance < 1
-    AND cpd.first_price = cpd.second_price
-    AND cpd.first_agency != cpd.second_agency
-), 
-EstablishExistingRelationships AS (
+Duplicate_pairs AS (
   SELECT
-    DISTINCT
-    fd.first_duplicate AS original_first_duplicate,
-    fd.second_duplicate AS original_second_duplicate,
-    CASE
-      WHEN dpd1.parent_property IS NOT NULL THEN dpd1.parent_property
-      WHEN dpd2.parent_property IS NOT NULL THEN dpd2.parent_property
-      WHEN dpd5.parent_property IS NOT NULL THEN dpd5.parent_property
-      WHEN dpd6.parent_property IS NOT NULL THEN dpd6.parent_property
-      ELSE fd.first_duplicate
-    END AS parent_duplicate_to_check,
-    CASE
-      WHEN dpd1.parent_property IS NOT NULL THEN fd.second_duplicate
-      WHEN dpd2.parent_property IS NOT NULL THEN fd.first_duplicate
-      WHEN dpd5.parent_property IS NOT NULL THEN fd.second_duplicate
-      WHEN dpd6.parent_property IS NOT NULL THEN fd.first_duplicate
-      ELSE fd.second_duplicate
-    END AS child_duplicate_to_check
+    p1.property_code AS property_code_1,
+    p2.property_code AS property_code_2
   FROM
-    FilteredDifferentials fd
-  LEFT JOIN {{ ref("stg_property_duplicates") }} dpd1
+    {{ ref("stg_property_duplicates") }} p1
+  JOIN
+    {{ ref("stg_property_duplicates") }} p2
   ON
-    fd.first_duplicate = CAST(dpd1.parent_property AS STRING)
-  LEFT JOIN {{ ref("stg_property_duplicates") }} dpd2
-  ON
-    fd.second_duplicate = CAST(dpd2.parent_property AS STRING)
-  LEFT JOIN {{ ref("stg_property_duplicates") }} dpd3
-  ON
-    fd.first_duplicate = CAST(dpd3.child_property AS STRING)
-  LEFT JOIN {{ ref("stg_property_duplicates") }} dpd4
-  ON
-    fd.second_duplicate = CAST(dpd4.child_property AS STRING)
-  LEFT JOIN {{ ref("stg_property_duplicates") }} dpd5
-  ON
-    dpd3.child_property = dpd5.child_property
-  LEFT JOIN {{ ref("stg_property_duplicates") }} dpd6
-  ON
-    dpd4.child_property = dpd6.child_property
-  WHERE NOT (dpd3.child_property IS NOT NULL AND dpd4.child_property IS NOT NULL)
-)
+    p1.duplicate_group_id = p2.duplicate_group_id
+    AND p1.property_code != p2.property_code
+),
+get_associated_duplicates as (
 
-SELECT Distinct
-       parent_duplicate_to_check,
-       child_duplicate_to_check,
-       CURRENT_DATETIME() AS dbt_loaded_at_utc,
-       '{{ var("job_id") }}' AS dbt_job_id
-FROM EstablishExistingRelationships
+SELECT first_duplicate, 
+       second_duplicate,
+       dpd1.duplicate_group_id as first_duplicate_group_id,
+       dpd2.duplicate_group_id as second_duplicate_group_id
+FROM Differentials d
+LEFT JOIN {{ ref("stg_property_distinct") }} pdi 
+  ON (d.first_duplicate = CAST(pdi.property_code_1 AS STRING) AND d.second_duplicate = pdi.property_code_2)
+      OR (d.first_duplicate = CAST(pdi.property_code_2 AS STRING) AND d.second_duplicate = pdi.property_code_1)
+LEFT JOIN {{ ref("stg_property_duplicates") }} dpd1 ON d.first_duplicate = dpd1.property_code
+LEFT JOIN {{ ref("stg_property_duplicates") }} dpd2 ON d.second_duplicate = dpd2.property_code
+WHERE 
+  d.distance < 1
+  AND d.first_agency != d.second_agency
+  AND d.first_price = d.second_price
+  AND pdi.property_code_1 IS NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM Duplicate_pairs dp
+    WHERE (dp.property_code_1 = d.first_duplicate AND dp.property_code_2 = d.second_duplicate)
+       OR (dp.property_code_1 = d.second_duplicate AND dp.property_code_2 = d.first_duplicate)
+  )
+), 
+RankedDuplicates as (
+SELECT
+  first_duplicate,
+  second_duplicate,
+  first_duplicate_group_id,
+  second_duplicate_group_id,
+  ROW_NUMBER() OVER (PARTITION BY first_duplicate_group_id ORDER BY first_duplicate_group_id) AS rn1,
+  ROW_NUMBER() OVER (PARTITION BY second_duplicate_group_id ORDER BY second_duplicate_group_id) AS rn2
+FROM get_associated_duplicates)
+
+SELECT
+  first_duplicate,
+  second_duplicate,
+  first_duplicate_group_id,
+  second_duplicate_group_id,
+  CURRENT_DATETIME() AS dbt_loaded_at_utc,
+  '{{ var("job_id") }}' AS dbt_job_id
+FROM RankedDuplicates
+WHERE rn1 = 1 
+   OR rn2 = 1 
+   OR first_duplicate_group_id IS NULL AND  second_duplicate_group_iD IS NULL
