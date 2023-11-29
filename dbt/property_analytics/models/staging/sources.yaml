@@ -27,3 +27,10 @@ sources:
         description: Test
         identifier: upload_duplicates
 
+  - name: duplicate_processing
+    schema: duplicate_processing
+    description: duplicate_processing
+    tables: 
+      - name: additional_duplicates
+        description: Test
+        identifier: additional_duplicates
