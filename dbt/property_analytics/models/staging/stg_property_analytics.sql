@@ -20,4 +20,4 @@ SELECT
 FROM
   ranked_data
 WHERE
-  row_num = 1
+  row_num = 1 and date_ is not null
