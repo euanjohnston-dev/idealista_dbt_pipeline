@@ -9,7 +9,7 @@ WITH source AS (
 
 ),
 
-final AS (
+transformed AS (
 
   SELECT 
     Distinct
@@ -24,4 +24,4 @@ final AS (
 
 )
 
-SELECT * FROM final
+SELECT * FROM transformed
