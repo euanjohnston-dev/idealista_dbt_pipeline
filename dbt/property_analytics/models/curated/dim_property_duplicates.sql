@@ -1,36 +1,66 @@
 {{ config(materialized='table') }}
 
-WITH join_latest AS (
-  SELECT
-    spd.ID,
-    spd.property_code AS duplicate_property_code,
-    spa.property_code AS latest_property_code,
-    spd.duplicate_group_id,
-    CURRENT_DATETIME() AS dbt_loaded_at_utc,
-    '{{ var("job_id") }}' AS dbt_job_id
-  FROM {{ ref("stg_property_duplicates") }} spd
-  LEFT JOIN (
+
+WITH property_duplicates AS (
+
+  SELECT * FROM {{ ref("int_property_duplicates") }} ipd
+
+),
+
+properties AS (
+
+  SELECT * FROM {{ ref("fct_properties") }} fp
+
+),
+
+get_latest_property_ids AS (
+
     SELECT property_code
-    FROM {{ ref("stg_property_analytics") }}
+    FROM properties
     WHERE dlt_scrape_date = (
       SELECT MAX(dlt_scrape_date)
-      FROM {{ ref("stg_property_analytics") }}
+      FROM properties
     )
-  ) spa ON spd.property_code = spa.property_code
+
+),
+
+get_latest_properties AS (
+
+  SELECT
+    pd.ID,
+    pd.property_code AS duplicate_property_code,
+    glpi.property_code AS latest_property_code,
+    pd.duplicate_group_id
+  FROM property_duplicates pd
+  LEFT JOIN get_latest_property_ids glpi 
+  ON PD.property_code = glpi.property_code
+
+),
+
+get_max_and_min_dates AS (
+
+  SELECT property_code, 
+         min(dlt_scrape_date) as first_scrape_date,
+         max(dlt_scrape_date) as latest_scrape_date
+  FROM  {{ ref("fct_properties") }}
+  GROUP BY property_code
+
+),
+
+final as (
+
+  SELECT
+    glp.ID,
+    glp.duplicate_property_code,
+    glp.duplicate_group_id,
+    COALESCE(glp.latest_property_code IS NOT NULL, false) AS advert_live,
+    gmamd.first_scrape_date,
+    gmamd.latest_scrape_date,
+    CURRENT_DATETIME() AS dbt_loaded_at_utc,
+    '{{ var("job_id") }}' AS dbt_job_id
+  FROM get_latest_properties glp
+  LEFT JOIN get_max_and_min_dates gmamd ON  glp.duplicate_property_code = gmamd.property_code
+
 )
 
-SELECT
-  jl.ID,
-  jl.duplicate_property_code,
-  jl.duplicate_group_id,
-  COALESCE(jl.latest_property_code IS NOT NULL, false) AS advert_live,
-  spa.first_scrape_date,
-  spa.latest_scrape_date,
-  jl.dbt_loaded_at_utc,
-  jl.dbt_job_id
-FROM join_latest jl
-left join (select property_code, 
-                  min(dlt_scrape_date) as first_scrape_date,
-                  max(dlt_scrape_date) as latest_scrape_date
-                  from  {{ ref("stg_property_analytics") }}
-                  group by property_code) spa on jl.duplicate_property_code = spa.property_code
+SELECT * FROM final

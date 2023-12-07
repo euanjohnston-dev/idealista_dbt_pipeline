@@ -1,23 +1,88 @@
 {{ config(materialized='table') }}
 
-WITH ranked_data AS (
-  SELECT
-    parel.*,
-    CAST(inserted_at AS DATE) AS date_,
-    ROW_NUMBER() OVER (PARTITION BY CAST(inserted_at AS DATE), property_code ORDER BY inserted_at DESC) AS row_num
-FROM {{ source('property_analytics', 'property_source_main') }} parel
-  LEFT JOIN
-       {{ source('property_analytics', 'pagination_metadata') }} par  ON parel._dlt_parent_id = par._dlt_id
-  LEFT JOIN
-         {{ source('property_analytics', 'load_metadata') }} dl ON par._dlt_load_id = dl.load_id
+WITH source AS (
+
+    SELECT * FROM {{ source('property_analytics', 'property_source_main') }}
+
+),
+
+transformed as (
+
+    SELECT CAST(property_code AS STRING) AS property_code,
+           thumbnail,
+           external_reference,
+           num_photos,
+           price,
+           property_type,
+           operation,
+           size,
+           rooms,
+           bathrooms,
+           address,
+           province,
+           municipality,
+           country,
+           location_id,
+           latitude,
+           longitude,
+           show_address,
+           url,
+           description,
+           has_video,
+           status,
+           new_development,
+           favourite,
+           new_property,
+           contact_info__commercial_name,
+           contact_info__phone1__phone_number,
+           contact_info__phone1__formatted_phone,
+           contact_info__phone1__prefix,
+           contact_info__phone1__phone_number_for_mobile_dialing,
+           contact_info__phone1__national_number,
+           contact_info__contact_name,
+           contact_info__user_type,
+           contact_info__agency_logo,
+           contact_info__contact_method,
+           contact_info__microsite_short_name,
+           price_by_area,
+           detailed_type__typology,
+           detailed_type__sub_typology,
+           suggested_texts__subtitle,
+           suggested_texts__title,
+           has_plan,
+           has3_d_tour,
+           has360,
+           has_staging,
+           urgent_visual_highlight,
+           visual_highlight,
+           top_highlight,
+           super_top_highlight,
+           preference_highlight,
+           top_new_development,
+           features__has_terrace,
+           features__has_air_conditioning,
+           features__has_box_room,
+           features__has_garden,
+           highlight__group_description,
+           features__has_swimming_pool,
+           price_drop_value,
+           drop_date,
+           price_drop_percentage,
+           parking_space__has_parking_space,
+           parking_space__is_parking_space_included_in_price,
+           floor,
+           has_lift,
+           contact_info__phone1__international_prefix,
+           highlight_comment,
+           top_plus,
+           _dlt_parent_id,
+           _dlt_list_idx,
+           _dlt_id,
+           CURRENT_DATETIME() AS dbt_loaded_at_utc,
+           '{{ var("job_id") }}' AS dbt_job_id
+    FROM source
+
 )
-SELECT
-  * Except(date_,row_num, property_code),
-  date_ as dlt_scrape_date,
-  CAST(property_code AS STRING) AS property_code,
-  CURRENT_DATETIME() AS dbt_loaded_at_utc,
-  '{{ var("job_id") }}' AS dbt_job_id
-FROM
-  ranked_data
-WHERE
-  row_num = 1 and date_ is not null
+
+SELECT *
+FROM transformed 

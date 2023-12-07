@@ -1,30 +1,28 @@
 -- models/my_schema/my_incremental_model.sql
 
--- Configuring the model for incremental materialization
-{{config(
-  materialized = 'incremental',
-  unique_key = 'ID'
-)
-}}
+{{ config(materialized='table') }}
 
--- Select statement for the incremental model
-WITH table_base AS (
-  SELECT
-    property_code,
-    duplicate_group_id
-  FROM {{ source('sheets_check', 'upload_duplicates') }}
-  union all 
-  SELECT
-    property_code,
-    duplicate_group_id
+
+WITH source AS (
+
+  SELECT *
   FROM {{ source('duplicate_processing', 'additional_duplicates') }}
-)
+
+),
+
+transformed AS (
+
 
 SELECT
   Distinct 
   LOWER(TO_HEX(SHA256(CONCAT(CAST(property_code AS STRING), '_', CAST(duplicate_group_id AS STRING))))) AS ID,
   CAST(property_code AS STRING) as property_code,
   CAST(duplicate_group_id AS STRING) as duplicate_group_id,
+  _dlt_load_id,
+  _dlt_id,
   CURRENT_DATETIME() AS dbt_loaded_at_utc,
   '{{ var("job_id") }}' AS dbt_job_id
-FROM table_base
+FROM source
+
+)
+SELECT * FROM transformed
