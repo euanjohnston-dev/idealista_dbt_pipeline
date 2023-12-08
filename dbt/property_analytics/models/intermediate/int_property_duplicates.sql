@@ -1,21 +1,17 @@
 -- models/my_schema/my_incremental_model.sql
 
--- Configuring the model for incremental materialization
-{{config(
-  materialized = 'table')
-}}
 
 WITH upload_duplicates AS (
 
   SELECT *
-  FROM {{ ref("stg_additional_duplicates") }} sad
+  FROM {{ ref("stg_duplicate_processing_additional_duplicates") }} sad
 
 ),
 
 additional_duplicates AS (
 
   SELECT *
-  FROM {{ ref("stg_upload_duplicates") }} sad
+  FROM {{ ref("stg_sheets_check_upload_duplicates") }} sad
 
 ),
 

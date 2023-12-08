@@ -1,17 +1,14 @@
--- models/my_schema/my_incremental_model.sql
 
-{{ config(materialized='table') }}
 
 
 WITH source AS (
 
   SELECT *
-  FROM {{ source('duplicate_processing', 'additional_duplicates') }}
+  FROM {{ source('sheets_check', 'upload_duplicates') }}
 
 ),
 
 transformed AS (
-
 
 SELECT
   Distinct 

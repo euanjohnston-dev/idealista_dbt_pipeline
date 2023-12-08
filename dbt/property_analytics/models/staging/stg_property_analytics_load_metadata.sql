@@ -1,4 +1,3 @@
-{{ config(materialized='table') }}
 
 WITH source AS (
 
@@ -21,3 +20,5 @@ transformed as (
 
 SELECT *
 FROM transformed 
+
+stg_load_metadata

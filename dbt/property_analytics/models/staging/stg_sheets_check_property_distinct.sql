@@ -1,6 +1,5 @@
 -- models/my_schema/my_incremental_model.sql
 
-{{ config(materialized='table') }}
 
 
 WITH source AS (

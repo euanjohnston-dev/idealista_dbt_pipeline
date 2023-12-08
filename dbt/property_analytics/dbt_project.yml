@@ -43,12 +43,12 @@ models:
     staging:
         +enabled: true
         +schema: staging
-        +materialized: table
+        +materialized: view
         +tags: staging
     intermediate:
         +enabled: true
         +schema: intermediate
-        +materialized: table
+        +materialized: ephemeral
         +tags: intermediate        
     curated:
         +enabled: true

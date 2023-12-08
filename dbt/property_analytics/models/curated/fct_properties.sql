@@ -1,22 +1,21 @@
-{{ config(materialized='table') }}
 
 WITH 
 
 property_source_main AS (
 
-    SELECT * FROM {{ ref("stg_property_analytics") }}
+    SELECT * FROM {{ ref("stg_property_analytics_property_source_main") }}
 
 ),
 
 pagination_metadata as (
 
-    SELECT * FROM {{ ref("stg_pagination_metadata") }}
+    SELECT * FROM {{ ref("stg_property_analytics_pagination_metadata") }}
 
 ),
 
 load_metadata as (
 
-    SELECT * FROM {{ ref("stg_load_metadata") }}
+    SELECT * FROM {{ ref("stg_property_analytics_load_metadata") }}
 
 ),
 

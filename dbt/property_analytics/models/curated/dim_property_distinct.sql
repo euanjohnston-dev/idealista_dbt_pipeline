@@ -1,10 +1,9 @@
-{{ config(materialized='table') }}
 
 
 WITH distinct_properties AS (
     
     SELECT * EXCEPT (dbt_loaded_at_utc,dbt_job_id)
-    FROM {{ ref("stg_property_distinct") }}
+    FROM {{ ref("stg_sheets_check_property_distinct") }}
 
 ),
 

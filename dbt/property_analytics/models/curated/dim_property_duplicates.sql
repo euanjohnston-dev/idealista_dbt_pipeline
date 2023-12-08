@@ -1,4 +1,3 @@
-{{ config(materialized='table') }}
 
 
 WITH property_duplicates AS (
