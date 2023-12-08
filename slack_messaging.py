@@ -1,9 +1,7 @@
 import slack
 import os
-from dotenv import load_dotenv
 
 def setup_slack_client():
-    load_dotenv()
     return slack.WebClient(token=os.environ['SLACK_TOKEN'])
 
 def send_slack_message(message, channel='#idealista-tracking', error_message=None):
