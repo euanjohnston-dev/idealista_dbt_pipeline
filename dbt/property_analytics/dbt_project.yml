@@ -45,21 +45,33 @@ models:
         +schema: staging
         +materialized: view
         +tags: staging
+        +docs:
+          node_color: "#FFD700" # yellow
     intermediate:
         +enabled: true
         +schema: intermediate
         +materialized: ephemeral
-        +tags: intermediate        
+        +tags: intermediate 
+        +docs:
+          node_color: "#FFA500"   # orange
     curated:
         +enabled: true
         +schema: curated
         +materialized: table
-        +tags: curated        
+        +tags: curated      
+        +docs:
+          node_color: "#FF6347"   # red 
     reporting:
         +enabled: true
         +schema: reporting
         +materialized: table
         +tags: reporting  
+        +docs:
+          node_color: "#4169E1"   # blue
+
+# snapshots:
+#   +target_schema: snapshots
+
 
 vars:
     # The job ID for the dbt run to store in the audit table columns
