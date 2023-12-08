@@ -16,6 +16,7 @@ def dbt_pipeline(data, context):
         # Add your logic to process the Pub/Sub message if needed
 
         # Run the DBT command
+        
         dbt_run()
         pipeline_success()
 

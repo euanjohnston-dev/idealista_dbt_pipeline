@@ -1,7 +1,9 @@
 import slack
 import os
+from dotenv import load_dotenv
 
 def setup_slack_client():
+    load_dotenv()
     return slack.WebClient(token=os.environ['SLACK_TOKEN'])
 
 def send_slack_message(message, channel='#idealista-tracking', error_message=None):
@@ -13,9 +15,10 @@ def send_slack_message(message, channel='#idealista-tracking', error_message=Non
     client.chat_postMessage(channel=channel, text=message)
 
 def pipeline_success():
-    send_slack_message('DBT Pipeline ran successfully')
+    send_slack_message('Idealista Pipeline ran successfully')
     return "Pipeline run successfully!"
 
 def pipeline_failure(error_message):
-    send_slack_message('DBT Pipeline failed', error_message=error_message)
+    send_slack_message('Idealista Pipeline failed', error_message=error_message)
     return f"Pipeline failed with error: {error_message}" if error_message else "Pipeline failed"
+
