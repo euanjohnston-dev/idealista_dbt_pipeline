@@ -1,0 +1,17 @@
+version: 2
+models:
+- name: dim_duplicates_to_check
+  description: This table outputs those duplicates outstanding that are required to be checked for their status as a duplicate.
+  columns:
+  - name: first_duplicate
+    description: The first of the two property_id's identified as a potential duplicate.
+  - name: second_duplicate
+    description: The secon of the two property_id's identified as a potential duplicate.
+  - name: first_duplicate_group_id
+    description: If applicable, the existing duplicate_group_id associated with the first duplicate.
+  - name: second_duplicate_group_id
+    description: If applicable, the existing duplicate_group_id associated with the second duplicate.
+  - name: dbt_job_id
+    description: '{{ doc("dbt_job_id") }}'
+  - name: dbt_loaded_at_utc
+    description: '{{ doc("dbt_loaded_at_utc") }}'

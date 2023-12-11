@@ -1,0 +1,21 @@
+version: 2
+models:
+- name: dim_property_duplicates
+  description: This table outputs the duplicate property codes and the duplicate_group_id's they have been assigned to.
+  columns:
+  - name: ID
+    description: The unique ID associated with the duplicate property code.
+  - name: duplicate_property_code
+    description: The property_code belonging to a duplicate group.
+  - name: duplicate_group_id
+    description: The second of the property_code pairs.
+  - name: advert_live
+    description: Whether the specific property_code is from an advert that is still live on the site (as of latest dbt_loaded_at_utc)
+  - name: first_scrape_date
+    description: The first time the property was identified.
+  - name: latest_scrape_date
+    description: The most recent time the property was identified.
+  - name: dbt_loaded_at_utc
+    description: '{{ doc("dbt_loaded_at_utc") }}'
+  - name: dbt_job_id
+    description: '{{ doc("dbt_job_id") }}'

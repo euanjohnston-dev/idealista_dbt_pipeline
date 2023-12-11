@@ -1,0 +1,19 @@
+version: 2
+models:
+- name: dim_property_distinct
+  description: This table outputs those property_code pairs which have been verified not to be duplicates.
+  columns:
+  - name: ID
+    description: The unique ID associated with the pairing.
+  - name: property_code_1
+    description: The first of the property_code pairs.
+  - name: property_code_2
+    description: The second of the property_code pairs.
+  - name: _dlt_load_id
+    description: The load_id associated with the pairing (load lineage).
+  - name: _dlt_id
+    description: The unique id associated with the line at load.
+  - name: dbt_job_id
+    description: '{{ doc("dbt_job_id") }}'
+  - name: dbt_loaded_at_utc
+    description: '{{ doc("dbt_loaded_at_utc") }}'

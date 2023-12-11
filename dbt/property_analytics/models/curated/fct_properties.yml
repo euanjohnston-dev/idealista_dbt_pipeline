@@ -1,0 +1,151 @@
+version: 2
+models:
+- name: fct_properties
+  description: This fact table represents all adverts posted on Idealista for the given searched area. Each row represents a property code on a given dlt_scrape_date.
+  columns:
+  - name: property_code
+    description: Unique identifier for each property.
+  - name: thumbnail
+    description: Thumbnail image associated with the property.
+  - name: external_reference
+    description: External reference code for the property.
+  - name: num_photos
+    description: Number of photos available for the property.
+  - name: price
+    description: Price of the property.
+  - name: property_type
+    description: Type of the property (e.g., apartment, house).
+  - name: operation
+    description: Type of operation for the property (e.g., sale, rent).
+  - name: size
+    description: Size or area of the property.
+  - name: rooms
+    description: Number of rooms in the property.
+  - name: bathrooms
+    description: Number of bathrooms in the property.
+  - name: address
+    description: Full address of the property.
+  - name: province
+    description: Province where the property is located.
+  - name: municipality
+    description: Municipality where the property is located.
+  - name: country
+    description: Country where the property is located.
+  - name: location_id
+    description: Identifier for the geographical location.
+  - name: latitude
+    description: Latitude coordinate of the property.
+  - name: longitude
+    description: Longitude coordinate of the property.
+  - name: show_address
+    description: Flag indicating whether the full address should be displayed.
+  - name: url
+    description: URL associated with the property.
+  - name: description
+    description: Description of the property.
+  - name: has_video
+    description: Flag indicating whether the property has a video.
+  - name: status
+    description: Status of the property (e.g., available, sold).
+  - name: new_development
+    description: Flag indicating whether the property is a new development.
+  - name: favourite
+    description: Flag indicating whether the property is marked as a favorite.
+  - name: new_property
+    description: Flag indicating whether the property is new.
+  - name: contact_info__commercial_name
+    description: Commercial name associated with contact information.
+  - name: contact_info__phone1__phone_number
+    description: Phone number associated with contact information.
+  - name: contact_info__phone1__formatted_phone
+    description: Formatted phone number associated with contact information.
+  - name: contact_info__phone1__prefix
+    description: Phone number prefix associated with contact information.
+  - name: contact_info__phone1__phone_number_for_mobile_dialing
+    description: Phone number for mobile dialing associated with contact information.
+  - name: contact_info__phone1__national_number
+    description: National phone number associated with contact information.
+  - name: contact_info__contact_name
+    description: Name of the contact person associated with the property.
+  - name: contact_info__user_type
+    description: Type of user associated with the contact information.
+  - name: contact_info__agency_logo
+    description: Logo associated with the agency in the contact information.
+  - name: contact_info__contact_method
+    description: Preferred contact method associated with the property.
+  - name: contact_info__microsite_short_name
+    description: Short name associated with the microsite in the contact information.
+  - name: price_by_area
+    description: Price per unit area of the property.
+  - name: detailed_type__typology
+    description: Typology details associated with the property.
+  - name: detailed_type__sub_typology
+    description: Sub-typology details associated with the property.
+  - name: suggested_texts__subtitle
+    description: Subtitle suggested for the property.
+  - name: suggested_texts__title
+    description: Title suggested for the property.
+  - name: has_plan
+    description: Flag indicating whether the property has a plan.
+  - name: has3_d_tour
+    description: Flag indicating whether the property has a 3D tour.
+  - name: has360
+    description: Flag indicating whether the property has a 360-degree view.
+  - name: has_staging
+    description: Flag indicating whether the property has staging.
+  - name: urgent_visual_highlight
+    description: Visual highlight indicating urgency.
+  - name: visual_highlight
+    description: Visual highlight associated with the property.
+  - name: top_highlight
+    description: Top highlight associated with the property.
+  - name: super_top_highlight
+    description: Super top highlight associated with the property.
+  - name: preference_highlight
+    description: Preference highlight associated with the property.
+  - name: top_new_development
+    description: Top highlight for new developments.
+  - name: features__has_terrace
+    description: Flag indicating whether the property has a terrace.
+  - name: features__has_air_conditioning
+    description: Flag indicating whether the property has air conditioning.
+  - name: features__has_box_room
+    description: Flag indicating whether the property has a box room.
+  - name: features__has_garden
+    description: Flag indicating whether the property has a garden.
+  - name: highlight__group_description
+    description: Group description associated with the property highlight.
+  - name: features__has_swimming_pool
+    description: Flag indicating whether the property has a swimming pool.
+  - name: price_drop_value
+    description: Value of the price drop for the property.
+  - name: drop_date
+    description: Date of the price drop for the property.
+  - name: price_drop_percentage
+    description: Percentage of the price drop for the property.
+  - name: parking_space__has_parking_space
+    description: Flag indicating whether the property has a parking space.
+  - name: parking_space__is_parking_space_included_in_price
+    description: Flag indicating whether the parking space is included in the price.
+  - name: floor
+    description: Floor level of the property.
+  - name: has_lift
+    description: Flag indicating whether the property has a lift.
+  - name: contact_info__phone1__international_prefix
+    description: International prefix associated with the phone number.
+  - name: highlight_comment
+    description: Comment associated with the property highlight.
+  - name: top_plus
+    description: Unsure.
+  - name: _dlt_parent_id
+    description: dlt parent_load meatadat lookup.
+  - name: _dlt_list_idx
+    description: dlt load list index.
+  - name: _dlt_id
+    description: The unique id associated with the line at load.
+  - name: dlt_scrape_date
+    description: Date when the data for the property was scraped.
+  - name: dbt_loaded_at_utc
+    description: '{{ doc("dbt_loaded_at_utc") }}'
+  - name: dbt_job_id
+    description: '{{ doc("dbt_job_id") }}'
