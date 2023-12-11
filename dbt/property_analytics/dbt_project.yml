@@ -60,7 +60,7 @@ models:
         +materialized: table
         +tags: curated      
         +docs:
-          node_color: "#FF6347"   # red 
+          node_color: "#555555"   # dark grey
     reporting:
         +enabled: true
         +schema: reporting

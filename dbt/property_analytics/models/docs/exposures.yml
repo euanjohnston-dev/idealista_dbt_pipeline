@@ -1,0 +1,35 @@
+version: 2
+
+exposures:
+
+  - name: Property_dashboard
+    type: dashboard
+    maturity: high
+    url: https://lookerstudio.google.com/reporting/d13f508f-5101-49af-95bb-e0db1eb54483/page/F0ShD
+    description: >
+      This dashboard highlights all relevant data necessary for tracking pricing and property trends in the chosen area of interest.
+
+    depends_on:
+      - ref('rpt_property_unique_latest')
+      - ref('rpt_unique_properties')
+      - ref('rpt_unique_properties_added_and_removed')
+
+
+    owner:
+      name: Euan Johnston
+      email: euanjohston92@gmail.com
+
+
+  - name: property_duplicates_to_check
+    type: notebook
+    maturity: high
+    url: https://docs.google.com/spreadsheets/d/1ft6plZYbFxscYRwNLCHLz5YFTnzgnBIqRrtVbvLYvU0/
+    description: >
+      This Gsheet is utilised to check suspected duplicates and forms part of a feedback loop to the main model.
+
+    depends_on:
+      - ref('dim_duplicates_to_check')
+
+    owner:
+      name: Euan Johnston
+      email: euanjohston92@gmail.com
