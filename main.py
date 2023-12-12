@@ -2,6 +2,12 @@ import logging
 from dbt_run_pipeline import dbt_run
 import base64
 from dlt.common.runtime.slack import send_slack_message
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+slack_webhook_url = os.environ.get('SLACK_WEBHOOK_URL')
+
 
 def notify_on_completion(hook):
     def decorator(func):
@@ -18,15 +24,15 @@ def notify_on_completion(hook):
         return wrapper
     return decorator
 
-@notify_on_completion("https://hooks.slack.com/services/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")
-def dbt_pipeline(data, context): 
-    """Triggered by a Pub/Sub message."""
-    logging.info(f"Function triggered by Pub/Sub event: {data}")
+@notify_on_completion(slack_webhook_url)
+def dbt_pipeline(): # data, context
+  #  """Triggered by a Pub/Sub message."""
+  #  logging.info(f"Function triggered by Pub/Sub event: {data}")
 
     try:
         # Decode the Pub/Sub message
-        message = base64.b64decode(data['data']).decode('utf-8')
-        logging.info(f"Received message data: {message}")
+   #     message = base64.b64decode(data['data']).decode('utf-8')
+   #     logging.info(f"Received message data: {message}")
 
         # Run the DBT command
         dbt_run()
@@ -35,3 +41,4 @@ def dbt_pipeline(data, context):
     except Exception as e:
         logging.error(f"Error executing DBT command: {e}")
 
+dbt_pipeline()
