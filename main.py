@@ -19,16 +19,14 @@ def notify_on_completion(hook):
     return decorator
 
 @notify_on_completion("https://hooks.slack.com/services/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")
-def dbt_pipeline(): #data, context
+def dbt_pipeline(data, context): 
     """Triggered by a Pub/Sub message."""
-   # logging.info(f"Function triggered by Pub/Sub event: {data}")
+    logging.info(f"Function triggered by Pub/Sub event: {data}")
 
     try:
         # Decode the Pub/Sub message
-    #    message = base64.b64decode(data['data']).decode('utf-8')
-     #   logging.info(f"Received message data: {message}")
-
-        # Add your logic to process the Pub/Sub message if needed
+        message = base64.b64decode(data['data']).decode('utf-8')
+        logging.info(f"Received message data: {message}")
 
         # Run the DBT command
         dbt_run()
@@ -37,4 +35,3 @@ def dbt_pipeline(): #data, context
     except Exception as e:
         logging.error(f"Error executing DBT command: {e}")
 
-dbt_pipeline()
