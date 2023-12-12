@@ -3,14 +3,14 @@
 
 WITH upload_duplicates AS (
 
-  SELECT *
+  SELECT DISTINCT *
   FROM {{ ref("stg_duplicate_processing_additional_duplicates") }} sad
 
 ),
 
 additional_duplicates AS (
 
-  SELECT *
+  SELECT DISTINCT *
   FROM {{ ref("stg_sheets_check_upload_duplicates") }} sad
 
 ),

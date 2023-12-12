@@ -41,7 +41,9 @@ live_duplicates AS (
 )
 
 SELECT
-  jd.*
+  DISTINCT jd.*,
+           CASE WHEN duplicate_adverts_added_count IS NULL THEN 0 ELSE duplicate_adverts_added_count END AS duplicate_adverts_added_count,
+           CONCAT("https://www.idealista.pt/en/imovel/",property_code,"/") AS lookup_link
 FROM join_duplicates jd
 LEFT JOIN live_duplicates ON jd.duplicate_group_id = live_duplicates.duplicate_group_id
 LEFT JOIN (
@@ -52,4 +54,3 @@ LEFT JOIN (
 ) counts ON jd.duplicate_group_id = counts.duplicate_group_id
 WHERE jd.duplicate_group_id IS NULL
    OR (live_duplicates.total_duplicate_adverts = counts.duplicate_adverts_added_count AND jd.dlt_scrape_date = live_duplicates.first_scrape_date)
-

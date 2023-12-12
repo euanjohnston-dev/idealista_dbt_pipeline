@@ -32,7 +32,7 @@ get_latest_properties AS (
     pd.duplicate_group_id
   FROM property_duplicates pd
   LEFT JOIN get_latest_property_ids glpi 
-  ON PD.property_code = glpi.property_code
+  ON pd.property_code = glpi.property_code
 
 ),
 
