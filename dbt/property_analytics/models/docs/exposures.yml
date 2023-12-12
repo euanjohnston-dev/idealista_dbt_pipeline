@@ -17,7 +17,6 @@ exposures:
 
     owner:
       name: Euan Johnston
-      email: euanjohston92@gmail.com
 
 
   - name: property_duplicates_to_check
@@ -32,4 +31,3 @@ exposures:
 
     owner:
       name: Euan Johnston
-      email: euanjohston92@gmail.com
